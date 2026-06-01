@@ -17,24 +17,38 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // Auto-redirect if the user lands on login page with an invite/recovery hash
+  // Handle invite/recovery hash tokens and normal auth state
   React.useEffect(() => {
-    // Read the hash FIRST — before createClient() which processes and clears it async
     const hash = window.location.hash
-    const isInviteFlow = hash.includes('access_token') && hash.includes('type=invite')
-    const hasTokens = hash.includes('access_token')
-
     const supabase = createClient()
 
+    // If the URL has tokens in the hash (invite or recovery implicit flow),
+    // manually parse them and establish the session ourselves.
+    // createBrowserClient does NOT auto-detect hash tokens (detectSessionInUrl is false).
+    if (hash && hash.includes('access_token')) {
+      const params = new URLSearchParams(hash.substring(1))
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
+      const type = params.get('type')
+
+      if (accessToken && refreshToken) {
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        }).then(({ error }) => {
+          if (!error) {
+            // Hard redirect so cookies are definitely sent with the server request
+            window.location.href = type === 'invite' ? '/settings?setup=1' : '/'
+          }
+        })
+        return // skip onAuthStateChange for implicit flows
+      }
+    }
+
+    // Normal login flow — listen for sign-in events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        if (isInviteFlow) {
-          router.push('/settings?setup=1')
-        } else if (hasTokens) {
-          router.push('/')
-        } else if (event === 'SIGNED_IN') {
-          router.push('/')
-        }
+      if (session && event === 'SIGNED_IN') {
+        router.push('/')
         router.refresh()
       }
     })
