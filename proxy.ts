@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -33,7 +33,7 @@ export function proxy(request: NextRequest) {
   // IMPORTANT: Do NOT add auth-based redirects here.
   // The proxy ONLY refreshes the session. The real security boundary
   // is RLS + server-side getUser() checks (Data Access Layer pattern).
-  supabase.auth.getUser()
+  await supabase.auth.getUser()
 
   return supabaseResponse
 }

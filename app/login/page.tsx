@@ -17,14 +17,22 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // Auto-redirect if the user lands on login page with an invite link or already has a session
+  // Auto-redirect if the user lands on login page with an invite/recovery hash
   React.useEffect(() => {
+    // Read the hash FIRST — before createClient() which processes and clears it async
+    const hash = window.location.hash
+    const isInviteFlow = hash.includes('access_token') && hash.includes('type=invite')
+    const hasTokens = hash.includes('access_token')
+
     const supabase = createClient()
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        if (window.location.hash.includes('type=invite')) {
+        if (isInviteFlow) {
           router.push('/settings?setup=1')
-        } else {
+        } else if (hasTokens) {
+          router.push('/')
+        } else if (event === 'SIGNED_IN') {
           router.push('/')
         }
         router.refresh()

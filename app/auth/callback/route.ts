@@ -12,7 +12,12 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+    // Code exchange failed — actual error
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  // No code param — this is the implicit flow (invite links).
+  // The tokens are in the URL hash fragment which the server cannot see.
+  // Redirect to /login and let the client-side JS pick up the hash.
+  return NextResponse.redirect(`${origin}/login`)
 }
