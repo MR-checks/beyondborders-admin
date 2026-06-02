@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { APP_NAME } from '@/lib/constants'
-import { Globe, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -48,8 +49,7 @@ export default function LoginPage() {
     // Normal login flow — listen for sign-in events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session && event === 'SIGNED_IN') {
-        router.push('/')
-        router.refresh()
+        window.location.href = '/'
       }
     })
     return () => subscription.unsubscribe()
@@ -69,16 +69,16 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/')
-    router.refresh()
+    // Force a hard redirect so the server definitively receives the new auth cookies
+    window.location.href = '/'
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 px-4">
       <Card className="w-full max-w-sm border-border/50 shadow-lg">
         <CardHeader className="text-center space-y-3">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-sm">
-            <Globe className="h-6 w-6 text-primary-foreground" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center shrink-0">
+            <Image src="/logo.png" alt="Logo" width={64} height={64} className="rounded-full shadow-sm" priority />
           </div>
           <div>
             <CardTitle className="text-xl">{APP_NAME}</CardTitle>

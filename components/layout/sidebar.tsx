@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -52,10 +53,10 @@ export function Sidebar({ userRole }: SidebarProps) {
     <aside className="flex h-full w-[260px] flex-col border-r border-border bg-sidebar">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 border-b border-border px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <Globe className="h-4 w-4 text-primary-foreground" />
+        <div className="flex h-8 w-8 items-center justify-center shrink-0">
+          <Image src="/logo.png" alt="Logo" width={32} height={32} className="rounded-full" priority />
         </div>
-        <span className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+        <span className="text-sm font-semibold tracking-tight text-sidebar-foreground truncate">
           {APP_SHORT_NAME}
         </span>
       </div>
