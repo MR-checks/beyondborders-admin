@@ -38,8 +38,10 @@ export default function LoginPage() {
           refresh_token: refreshToken,
         }).then(({ error }) => {
           if (!error) {
-            // Hard redirect so cookies are definitely sent with the server request
-            window.location.href = type === 'invite' ? '/settings?setup=1' : '/'
+            // Any email link flow (invite, recovery, magiclink) should ideally 
+            // drop the user in settings so they can set/update their password.
+            const needsSetup = type === 'invite' || type === 'recovery' || type === 'magiclink'
+            window.location.href = needsSetup ? '/settings?setup=1' : '/'
           }
         })
         return // skip onAuthStateChange for implicit flows
